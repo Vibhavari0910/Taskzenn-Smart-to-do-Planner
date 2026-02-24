@@ -1,98 +1,236 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
 <div class="container mt-4">
 
-    <h2 class="mb-3">My Tasks</h2>
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Dashboard</h2>
+        <a href="{% url 'add_task' %}" class="btn btn-primary">+ Add Task</a>
+    </div>
 
-    <a href="{% url 'add_task' %}" class="btn btn-primary mb-3">+ Add Task</a>
-
-    <!-- 🔥 STATISTICS SECTION -->
+    <!-- 🔥 STATISTICS -->
     <div class="row text-center mb-4">
-        <div class="col">
-            <h6>Total</h6>
-            <h4>{{ total_tasks }}</h4>
+
+        <div class="col-md-2 col-6 mb-2">
+            <div class="card p-2 shadow-sm">
+                <h6>Total</h6>
+                <h4>{{ total_tasks }}</h4>
+            </div>
         </div>
-        <div class="col">
-            <h6>Completed</h6>
-            <h4 class="text-success">{{ completed_tasks }}</h4>
+
+        <div class="col-md-2 col-6 mb-2">
+            <div class="card p-2 shadow-sm">
+                <h6 class="text-success">Completed</h6>
+                <h4>{{ completed_tasks }}</h4>
+            </div>
         </div>
-        <div class="col">
-            <h6>Pending</h6>
-            <h4 class="text-warning">{{ pending_tasks }}</h4>
+
+        <div class="col-md-2 col-6 mb-2">
+            <div class="card p-2 shadow-sm">
+                <h6 class="text-warning">Pending</h6>
+                <h4>{{ pending_tasks }}</h4>
+            </div>
         </div>
-        <div class="col">
-            <h6>Overdue</h6>
-            <h4 class="text-danger">{{ overdue_tasks }}</h4>
+
+        <div class="col-md-2 col-6 mb-2">
+            <div class="card p-2 shadow-sm">
+                <h6 class="text-danger">Overdue</h6>
+                <h4>{{ overdue_tasks }}</h4>
+            </div>
         </div>
-        <div class="col">
-            <h6>Productivity</h6>
-            <h4>{{ productivity }}%</h4>
+
+        <div class="col-md-4 col-12">
+            <div class="card p-2 shadow-sm">
+                <h6>Productivity</h6>
+                <div class="progress">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ productivity }}%">
+                        {{ productivity }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 📅 WEEKLY PERFORMANCE -->
+    <div class="card shadow-sm p-3 mb-4">
+        <h5 class="mb-3">📅 Weekly Performance</h5>
+
+        <div class="d-flex justify-content-between">
+            <div>
+                <strong>This Week:</strong>
+                <span class="fs-5">{{ this_week_productivity }}%</span>
+            </div>
+
+            <div>
+                <strong>Last Week:</strong>
+                <span class="fs-5">{{ last_week_productivity }}%</span>
+
+                {% if trend > 0 %}
+                <span class="text-success fw-bold ms-2">↑</span>
+                {% elif trend < 0 %} <span class="text-danger fw-bold ms-2">↓</span>
+                    {% else %}
+                    <span class="text-muted ms-2">-</span>
+                    {% endif %}
+            </div>
         </div>
     </div>
 
-    <!-- 🔥 TASK LIST -->
-    <ul class="list-group">
+    
+
+    <!-- 🔍 FILTERS -->
+    <form method="get" class="row g-2 mb-4">
+
+        <div class="col-md-3">
+            <select name="category" class="form-select">
+                <option value="">All Categories</option>
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+                <option value="Overdue">Overdue</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <select name="priority" class="form-select">
+                <option value="">All Priorities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <button class="btn btn-dark w-100">Apply Filters</button>
+        </div>
+    </form>
+
+    <!-- 📅 DATE FILTER BUTTONS -->
+    <div class="mb-3">
+        <div class="btn-group">
+
+            <a href="?date=today" class="btn btn-outline-dark btn-sm">Today</a>
+
+            <a href="?date=tomorrow" class="btn btn-outline-dark btn-sm">Tomorrow</a>
+
+            <a href="?date=week" class="btn btn-outline-dark btn-sm">This Week</a>
+
+            <a href="?date=overdue" class="btn btn-outline-danger btn-sm">Overdue</a>
+
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm">All</a>
+
+        </div>
+    </div>
+
+    {% if overdue_count > 0 %}
+    <div class="alert alert-danger">
+        ⚠️ You have {{ overdue_count }} overdue task{{ overdue_count|pluralize }}
+    </div>
+    {% endif %}
+
+    <!-- 📋 TASK LIST -->
+    <ul class="list-group shadow-sm">
+
         {% for task in tasks %}
-            <li class="list-group-item 
-                {% if task.is_overdue %}list-group-item-danger{% endif %}">
+        <li class="list-group-item {% if task.is_overdue %}list-group-item-danger{% endif %}">
 
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center">
 
-                    <div>
-                        <strong>{{ task.title }}</strong><br>
+                <div>
+                    <strong
+                        class="{% if task.status == 'Completed' %}text-decoration-line-through text-muted{% endif %}">
+                        {{ task.title }}
+                    </strong>
 
-                        <!-- Category -->
-                        <small>Category: {{ task.category }}</small><br>
+                    <small class="d-block">Category: {{ task.category }}</small>
 
-                        <!-- Priority Colors -->
-                        {% if task.priority == 'High' %}
-                            <span class="badge bg-danger">High</span>
-                        {% elif task.priority == 'Medium' %}
-                            <span class="badge bg-warning text-dark">Medium</span>
-                        {% else %}
-                            <span class="badge bg-success">Low</span>
-                        {% endif %}
+                    <!-- Priority Badge -->
+                    {% if task.priority == 'High' %}
+                    <span class="badge bg-danger">High</span>
+                    {% elif task.priority == 'Medium' %}
+                    <span class="badge bg-warning text-dark">Medium</span>
+                    {% else %}
+                    <span class="badge bg-success">Low</span>
+                    {% endif %}
 
-                        <!-- Status -->
-                        {% if task.status == 'Completed' %}
-                            <span class="badge bg-success">Completed</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Pending</span>
-                        {% endif %}
+                    <!-- Status Badge -->
+                    {% if task.status == 'Completed' %}
+                    <span class="badge bg-success">Completed</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Pending</span>
+                    {% endif %}
 
-                        <!-- Deadline -->
-                        <br>
-                        <small>Deadline: {{ task.deadline }}</small>
+                    <br>
+                    <small>Deadline: {{ task.deadline }}</small>
 
-                        {% if task.is_overdue %}
-                            <span class="badge bg-danger">Overdue</span>
-                        {% endif %}
-                    </div>
+                    {% if task.is_due_soon %}
+                    <span class="badge bg-warning text-dark ms-2">Due Soon ⏰</span>
+                    {% endif %}
 
-                    <!-- Action Buttons -->
-                    <div>
-                        <a href="{% url 'update_task' task.pk %}" 
-                           class="btn btn-sm btn-info">Edit</a>
-
-                        {% if task.status != 'Completed' %}
-                        <a href="{% url 'complete_task' task.pk %}" 
-                           class="btn btn-sm btn-success">Complete</a>
-                        {% endif %}
-
-                        <a href="{% url 'delete_task' task.pk %}" 
-                           class="btn btn-sm btn-danger">Delete</a>
-                    </div>
-
+                    {% if task.is_overdue %}
+                    <span class="badge bg-danger ms-2">Overdue</span>
+                    {% endif %}
                 </div>
-            </li>
+
+                <div class="btn-group">
+                    <a href="{% url 'update_task' task.pk %}" class="btn btn-sm btn-info">Edit</a>
+
+                    {% if task.status != 'Completed' %}
+                    <a href="{% url 'complete_task' task.pk %}" class="btn btn-sm btn-success">Complete</a>
+                    {% endif %}
+
+                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                        data-bs-target="#deleteModal{{ task.pk }}">
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <!-- DELETE MODAL -->
+            <div class="modal fade" id="deleteModal{{ task.pk }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            Are you sure you want to delete "<strong>{{ task.title }}</strong>"?
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+
+                            <a href="{% url 'delete_task' task.pk %}" class="btn btn-danger">
+                                Delete
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </li>
 
         {% empty %}
-            <li class="list-group-item">No tasks yet.</li>
+        <li class="list-group-item text-center text-muted">
+            No tasks yet. Click <strong>“Add Task”</strong> to get started 🚀
+        </li>
         {% endfor %}
+
     </ul>
 
 </div>
-
 {% endblock %}

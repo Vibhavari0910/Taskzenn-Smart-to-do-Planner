@@ -1,10 +1,7 @@
 from django.contrib import admin
-from .models import Task, SubTask
+from .models import Task
 
 
-class SubTaskInline(admin.TabularInline):
-    model = SubTask
-    extra = 1
 
 
 class TaskAdmin(admin.ModelAdmin):
@@ -12,8 +9,7 @@ class TaskAdmin(admin.ModelAdmin):
     list_filter = ('priority', 'status', 'category')
     search_fields = ('title', 'user__username')
     ordering = ('-created_at',)
-    inlines = [SubTaskInline]
+    
 
 
 admin.site.register(Task, TaskAdmin)
-admin.site.register(SubTask)

@@ -3,45 +3,50 @@
 {% block content %}
 
 <div class="container mt-4">
-    <div class="card shadow p-4">
+  <div class="card shadow p-4">
 
-        <h3 class="mb-4 text-center">Add New Task</h3>
-
-        <form method="post">
-            {% csrf_token %}
-
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-                {{ form.title }}
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Description</label>
-                {{ form.description }}
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Priority</label>
-                {{ form.priority }}
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Category</label>
-                {{ form.category }}
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Deadline</label>
-                {{ form.deadline }}
-            </div>
-
-            <div class="d-flex justify-content-between">
-                <a href="{% url 'task_list' %}" class="btn btn-secondary">Back</a>
-                <button type="submit" class="btn btn-primary">Save Task</button>
-            </div>
-        </form>
-
+    <h3 class="mb-4 text-center">Add New Task</h3>
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      {{ form.errors }}
     </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        {{ form.title }}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        {{ form.description }}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Priority</label>
+        {{ form.priority }}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Category</label>
+        {{ form.category }}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Deadline</label>
+        {{ form.deadline }}
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back</a>
+        <button type="submit" class="btn btn-primary">Save Task</button>
+      </div>
+    </form>
+
+  </div>
 </div>
 
 {% endblock %}

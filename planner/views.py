@@ -1,15 +1,21 @@
-from django.shortcuts import render,redirect, get_object_or_404
-from .forms import RegisterForm
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.views import LogoutView
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import RegisterForm, TaskForm
+from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
 from .models import Task
-from .forms import TaskForm
+from django.contrib import messages
+from datetime import date, timedelta
+from django.utils import timezone
 
-# Create your views here.
+
+# Home
 def home(request):
-    return render(request,'home.html')
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'home.html')
 
+
+# Register
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -21,47 +27,145 @@ def register(request):
 
     return render(request, 'register.html', {'form': form})
 
+
+# Login / Logout
 class CustomLoginView(LoginView):
     template_name = 'login.html'
+
 
 class CustomLogoutView(LogoutView):
     next_page = 'home'
 
+
+# ✅ DASHBOARD (Main Logic)
 @login_required
 def dashboard(request):
-    tasks = Task.objects.filter(user=request.user)
-    return render(request, 'dashboard.html', {'tasks': tasks})
 
-@login_required
-def task_list(request):
+    tasks = Task.objects.filter(
+        user=request.user,
+        is_deleted=False
+    )
 
+    # 🔍 Filters
     category = request.GET.get('category')
-
-    tasks = Task.objects.filter(user=request.user)
+    status = request.GET.get('status')
+    priority = request.GET.get('priority')
+    date_filter = request.GET.get('date')
 
     if category:
         tasks = tasks.filter(category=category)
 
-    # 🔥 ADD STATISTICS HERE
-    total_tasks = tasks.count()
-    completed_tasks = tasks.filter(status='Completed').count()
-    pending_tasks = tasks.filter(status='Pending').count()
-    overdue_tasks = [t for t in tasks if t.is_overdue]
+    if status:
+        if status == 'Overdue':
+            tasks = [t for t in tasks if t.is_overdue]
+        else:
+            tasks = tasks.filter(status=status)
 
-    # Optional: Productivity %
-    if total_tasks > 0:
-        productivity = (completed_tasks / total_tasks) * 100
-    else:
-        productivity = 0
+    if priority:
+        tasks = tasks.filter(priority=priority)
 
-    return render(request, 'dashboard.html', {
-        'tasks': tasks,
+    # 🔥 Date Filters
+    today = date.today()
+
+    if date_filter == "today":
+        tasks = tasks.filter(deadline=today)
+
+    elif date_filter == "tomorrow":
+        tasks = tasks.filter(deadline=today + timedelta(days=1))
+
+    elif date_filter == "week":
+        week_end = today + timedelta(days=7)
+        tasks = tasks.filter(deadline__range=(today, week_end))
+
+    elif date_filter == "overdue":
+        tasks = [t for t in tasks if t.is_overdue]
+
+    # Convert safely to list
+    tasks_list = list(tasks)
+
+    # 📊 Statistics
+    total_tasks = len(tasks_list)
+    completed_tasks = len([t for t in tasks_list if t.status == 'Completed'])
+    pending_tasks = len([t for t in tasks_list if t.status == 'Pending'])
+    overdue_tasks = len([t for t in tasks_list if t.is_overdue])
+
+    productivity = int((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 0
+
+    
+
+    # ===============================
+    # 📅 WEEKLY PRODUCTIVITY
+    # ===============================
+
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+
+    start_of_last_week = start_of_week - timedelta(days=7)
+    end_of_last_week = start_of_week - timedelta(days=1)
+
+    this_week_tasks = Task.objects.filter(
+        user=request.user,
+        is_deleted=False,
+        deadline__range=[start_of_week, end_of_week]
+    )
+
+    this_week_total = this_week_tasks.count()
+    this_week_completed = this_week_tasks.filter(status='Completed').count()
+
+    this_week_productivity = (
+        int((this_week_completed / this_week_total) * 100)
+        if this_week_total > 0 else 0
+    )
+
+    last_week_tasks = Task.objects.filter(
+        user=request.user,
+        is_deleted=False,
+        deadline__range=[start_of_last_week, end_of_last_week]
+    )
+
+    last_week_total = last_week_tasks.count()
+    last_week_completed = last_week_tasks.filter(status='Completed').count()
+
+    last_week_productivity = (
+        int((last_week_completed / last_week_total) * 100)
+        if last_week_total > 0 else 0
+    )
+
+    trend = this_week_productivity - last_week_productivity
+
+    # ===============================
+    # 🔔 OVERDUE ALERT COUNT
+    # ===============================
+
+    overdue_count = Task.objects.filter(
+    user=request.user,
+    is_deleted=False,
+    status='Pending',
+   deadline=today
+    ).count()
+
+    # ===============================
+    # FINAL CONTEXT
+    # ===============================
+
+    context = {
+        'tasks': tasks_list,
         'total_tasks': total_tasks,
         'completed_tasks': completed_tasks,
         'pending_tasks': pending_tasks,
-        'overdue_tasks': len(overdue_tasks),
-        'productivity': round(productivity, 2),
-    })
+        'overdue_tasks': overdue_tasks,
+        'productivity': productivity,
+        'this_week_productivity': this_week_productivity,
+        'last_week_productivity': last_week_productivity,
+        'trend': trend,
+        'overdue_count': overdue_count,
+        'this_week_productivity': this_week_productivity,
+        'last_week_productivity': last_week_productivity,
+        'trend': trend,
+        'overdue_count': overdue_count,
+    }
+
+    return render(request, 'dashboard.html', context)
 
 @login_required
 def add_task(request):
@@ -70,11 +174,13 @@ def add_task(request):
         if form.is_valid():
             task = form.save(commit=False)
             task.user = request.user
+            task.status = 'Pending'
             task.save()
-            return redirect('task_list')
+            messages.success(request, "Task added successfully")
+            return redirect('dashboard')
     else:
         form = TaskForm()
-
+    
     return render(request, 'add_task.html', {'form': form})
 
 @login_required
@@ -91,16 +197,44 @@ def update_task(request, pk):
 
     return render(request, 'edit_task.html', {'form': form})
 
+# Complete Task
 @login_required
 def complete_task(request, pk):
     task = get_object_or_404(Task, pk=pk, user=request.user)
     task.status = 'Completed'
     task.save()
-    return redirect('task_list')
+    messages.success(request, "Task marked as completed")
+    return redirect('dashboard')
 
 
+# Soft Delete
 @login_required
 def delete_task(request, pk):
     task = get_object_or_404(Task, pk=pk, user=request.user)
-    task.delete()
-    return redirect('task_list')
+    task.is_deleted = True
+    task.save()
+    messages.success(request, "Task deleted")
+    return redirect('dashboard')
+
+@login_required
+def profile(request):
+    tasks = Task.objects.filter(
+        user=request.user,
+        is_deleted=False
+    )
+
+    total_tasks = tasks.count()
+    completed_tasks = tasks.filter(status='Completed').count()
+
+    productivity = (
+        int((completed_tasks / total_tasks) * 100)
+        if total_tasks > 0 else 0
+    )
+
+    context = {
+        'total_tasks': total_tasks,
+        'completed_tasks': completed_tasks,
+        'productivity': productivity,
+    }
+
+    return render(request, 'profile.html', context)
