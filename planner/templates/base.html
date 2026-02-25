@@ -42,7 +42,7 @@
         {% endfor %}
         {% endif %}
     </div>
-
+    {% if user.is_authenticated %}
     <!-- PAGE CONTENT -->
     <div class="d-flex">
 
@@ -69,9 +69,29 @@
                         ➕ Add Task
                     </a>
                 </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'all_tasks' %}" class="nav-link text-white">
+                        📋 All Tasks
+                    </a>
+                </li>
 
+                <li class="nav-item mb-2">
+                    <a href="{% url 'todays_task' %}" class="nav-link text-white">
+                        📅 Today
+                    </a>
+                </li>
+
+                <li class="nav-item mt-4">
+                    <form method="POST" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger w-100">
+                            🚪 Logout
+                        </button>
+                    </form>
+                </li>
             </ul>
         </div>
+        {% endif %}
 
         <!-- Main Content -->
         <div class="flex-fill p-4">

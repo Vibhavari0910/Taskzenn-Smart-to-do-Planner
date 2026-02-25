@@ -22,6 +22,8 @@ class Task(models.Model):
         ('Study', 'Study'),
         ('Personal', 'Personal'),
         ('Health', 'Health'),
+        ('Finance', 'Finance'),
+        ('Other', 'Other'),
     ]
 
     title = models.CharField(max_length=200)

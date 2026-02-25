@@ -238,3 +238,24 @@ def profile(request):
     }
 
     return render(request, 'profile.html', context)
+
+@login_required
+def all_tasks(request):
+    tasks = Task.objects.filter(
+        user=request.user,
+        is_deleted=False
+    ).order_by('-created_at')
+
+    return render(request, 'all_tasks.html', {'tasks': tasks})
+
+@login_required
+def todays_task(request):
+    today = date.today()
+
+    tasks = Task.objects.filter(
+        user=request.user,
+        deadline=today,
+        is_deleted=False
+    )
+
+    return render(request, 'todays_task.html', {'tasks': tasks})

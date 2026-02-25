@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Today's Tasks</h2>
+
+{% for task in tasks %}
+<div class="card mb-3 p-3">
+    <h5>{{ task.title }}</h5>
+    <p>Deadline: {{ task.deadline }}</p>
+    <span class="badge bg-warning">{{ task.status }}</span>
+</div>
+{% empty %}
+<p>No tasks due today.</p>
+{% endfor %}
+
+{% endblock %}

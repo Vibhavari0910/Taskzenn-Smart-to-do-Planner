@@ -17,4 +17,7 @@ urlpatterns = [
     path('tasks/complete/<int:pk>/', views.complete_task, name='complete_task'),
     path('tasks/delete/<int:pk>/', views.delete_task, name='delete_task'),
     path('profile/', views.profile, name='profile'),
+    path('tasks/', views.all_tasks, name='all_tasks'),
+    path('tasks/today/', views.todays_task, name='todays_task'),
+    
 ]
