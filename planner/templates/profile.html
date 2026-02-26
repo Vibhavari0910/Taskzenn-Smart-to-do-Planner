@@ -1,12 +1,51 @@
+<style>
+.card{border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,.1);}
+</style>
+
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="container mt-4">
-    <h2>Profile</h2>
 
-    <p><strong>Username:</strong> {{ request.user.username }}</p>
-    <p><strong>Total Tasks:</strong> {{ total_tasks }}</p>
-    <p><strong>Completed Tasks:</strong> {{ completed_tasks }}</p>
-    <p><strong>Productivity:</strong> {{ productivity }}%</p>
+<style>
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:25px;
+}
+
+.card{
+padding:30px;border-radius:15px;color:white;
+box-shadow:0 10px 20px rgba(0,0,0,.2);
+}
+.blue{background:linear-gradient(45deg,#3b82f6,#1d4ed8);}
+.green{background:linear-gradient(45deg,#10b981,#047857);}
+.orange{background:linear-gradient(45deg,#f59e0b,#b45309);}
+.purple{background:linear-gradient(45deg,#8b5cf6,#5b21b6);}
+</style>
+
+<h2>Profile</h2>
+
+<div class="grid">
+
+<div class="card blue">
+<h4>Username</h4>
+<h2>{{ user.username|capfirst }}</h2>
 </div>
+
+<div class="card green">
+<h4>Total Tasks</h4>
+<h2>{{ total_tasks }}</h2>
+</div>
+
+<div class="card orange">
+<h4>Completed Tasks</h4>
+<h2>{{ completed_tasks }}</h2>
+</div>
+
+<div class="card purple">
+<h4>Productivity</h4>
+<h2>{{ productivity }}%</h2>
+</div>
+
+</div>
+
 {% endblock %}

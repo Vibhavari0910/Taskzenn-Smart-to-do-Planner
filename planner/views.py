@@ -1,11 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import RegisterForm, TaskForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
 from .models import Task
 from django.contrib import messages
 from datetime import date, timedelta
-from django.utils import timezone
+from .forms import RegisterForm, TaskForm
 
 
 # Home
@@ -21,6 +20,7 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, "Registered successfully! Please login.")
             return redirect('login')
     else:
         form = RegisterForm()
@@ -28,9 +28,14 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
+
 # Login / Logout
 class CustomLoginView(LoginView):
     template_name = 'login.html'
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid username or password.")
+        return super().form_invalid(form)
 
 
 class CustomLogoutView(LogoutView):
@@ -177,14 +182,15 @@ def add_task(request):
         form = TaskForm(request.POST)
         if form.is_valid():
             task = form.save(commit=False)
-            task.user = request.user
-            task.status = 'Pending'
+            task.user = request.user   # VERY IMPORTANT
             task.save()
-            messages.success(request, "Task added successfully")
+            messages.success(request, "Task saved successfully!")
             return redirect('dashboard')
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = TaskForm()
-    
+
     return render(request, 'add_task.html', {'form': form})
 
 @login_required

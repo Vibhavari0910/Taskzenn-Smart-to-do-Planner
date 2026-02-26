@@ -9,13 +9,39 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
+    # remove help text
+    def _init_(self, *args, **kwargs):
+        super()._init_(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.help_text = None
+
+    # remove help text
+    def _init_(self, *args, **kwargs):
+        super()._init_(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.help_text = None
+
 
 class TaskForm(forms.ModelForm):
-    deadline = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'}),
-        required=True
-    )
-
     class Meta:
         model = Task
-        exclude = ['user', 'status','created_at', 'updated_at']
+        fields = ['title', 'description', 'priority', 'category', 'deadline']        
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter task title'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter task description',
+                'rows': 4
+            }),
+            'priority': forms.Select(attrs={'class': 'form-select'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'deadline': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+        }

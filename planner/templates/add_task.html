@@ -2,13 +2,14 @@
 
 {% block content %}
 
-<div class="container mt-4">
-  <div class="card shadow p-4">
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow-lg p-4" style="width: 100%; max-width: 600px; border-radius: 15px;">
 
-    <h3 class="mb-4 text-center">Add New Task</h3>
+    <h3 class="mb-4 text-center fw-bold text-primary">➕ Add New Task</h3>
+
     {% if form.errors %}
     <div class="alert alert-danger">
-      {{ form.errors }}
+      Please correct the errors below.
     </div>
     {% endif %}
 
@@ -16,34 +17,39 @@
       {% csrf_token %}
 
       <div class="mb-3">
-        <label class="form-label">Title</label>
+        <label class="form-label fw-semibold">Title</label>
         {{ form.title }}
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Description</label>
+        <label class="form-label fw-semibold">Description</label>
         {{ form.description }}
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Priority</label>
+        <label class="form-label fw-semibold">Priority</label>
         {{ form.priority }}
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Category</label>
+        <label class="form-label fw-semibold">Category</label>
         {{ form.category }}
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Deadline</label>
+        <label class="form-label fw-semibold">Deadline</label>
         {{ form.deadline }}
       </div>
 
-      <div class="d-flex justify-content-between">
-        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back</a>
-        <button type="submit" class="btn btn-primary">Save Task</button>
+      <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary px-4">
+          ⬅ Back
+        </a>
+        <button type="submit" class="btn btn-primary px-4">
+          💾 Save Task
+        </button>
       </div>
+
     </form>
 
   </div>
