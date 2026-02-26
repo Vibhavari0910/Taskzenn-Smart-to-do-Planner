@@ -34,7 +34,7 @@ class CustomLoginView(LoginView):
 
 
 class CustomLogoutView(LogoutView):
-    next_page = 'home'
+    next_page = 'login'
 
 
 # ✅ DASHBOARD (Main Logic)
@@ -45,6 +45,10 @@ def dashboard(request):
         user=request.user,
         is_deleted=False
     )
+    search_query = request.GET.get('search')
+
+    if search_query:
+       tasks = tasks.filter(title__icontains=search_query)
 
     # 🔍 Filters
     category = request.GET.get('category')
@@ -259,3 +263,6 @@ def todays_task(request):
     )
 
     return render(request, 'todays_task.html', {'tasks': tasks})
+
+def about(request):
+    return render(request, 'about.html')

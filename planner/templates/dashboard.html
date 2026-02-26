@@ -9,6 +9,14 @@
         <a href="{% url 'add_task' %}" class="btn btn-primary">+ Add Task</a>
     </div>
 
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search by task title..."
+                value="{{ request.GET.search }}">
+            <button class="btn btn-dark">Search</button>
+        </div>
+    </form>
+    
     <!-- 🔥 STATISTICS -->
     <div class="row text-center mb-4">
 
@@ -77,7 +85,7 @@
         </div>
     </div>
 
-    
+
 
     <!-- 🔍 FILTERS -->
     <form method="get" class="row g-2 mb-4">
@@ -140,6 +148,8 @@
         ⚠️ You have {{ overdue_count }} overdue task{{ overdue_count|pluralize }}
     </div>
     {% endif %}
+
+  
 
     <!-- 📋 TASK LIST -->
     <ul class="list-group shadow-sm">
@@ -233,6 +243,12 @@
         <li class="list-group-item text-center text-muted">
             No tasks yet. Click <strong>“Add Task”</strong> to get started 🚀
         </li>
+
+
+        <li class="list-group-item text-center text-muted">
+            No matching tasks found.
+        </li>
+
         {% endfor %}
 
     </ul>
