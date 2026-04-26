@@ -1,14 +1,11 @@
 from django.urls import path
 from . import views
-from .views import home,register
-from .views import CustomLoginView
-from .views import CustomLogoutView
-
+from django.contrib.auth.views import LogoutView
 urlpatterns = [
-    path('', home, name='home'),
-    path('register/', register, name='register'),
-    path('login/', CustomLoginView.as_view(), name='login'),
-    path('logout/', CustomLogoutView.as_view(), name='logout'),
+      path('', views.login_page, name='login'),
+    path('register/', views.register_page, name='register'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('tasks/add/', views.add_task, name='add_task'),
@@ -17,4 +14,7 @@ urlpatterns = [
     path('tasks/complete/<int:pk>/', views.complete_task, name='complete_task'),
     path('tasks/delete/<int:pk>/', views.delete_task, name='delete_task'),
     path('profile/', views.profile, name='profile'),
+    path('tasks/', views.all_tasks, name='all_tasks'),
+    path('tasks/today/', views.todays_task, name='todays_task'),
+    
 ]

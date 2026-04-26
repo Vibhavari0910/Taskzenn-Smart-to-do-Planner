@@ -1,4 +1,9 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect
 from .forms import RegisterForm, TaskForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
@@ -8,34 +13,38 @@ from datetime import date, timedelta
 from django.utils import timezone
 
 
-# Home
-def home(request):
-    if request.user.is_authenticated:
-        return redirect('dashboard')
-    return render(request, 'home.html')
-
-
-# Register
-def register(request):
+def login_page(request):
     if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = RegisterForm()
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
-    return render(request, 'register.html', {'form': form})
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            return render(request, 'login.html', {'error': 'Invalid credentials'})
 
-
-# Login / Logout
-class CustomLoginView(LoginView):
-    template_name = 'login.html'
+    return render(request, 'login.html')
 
 
-class CustomLogoutView(LogoutView):
-    next_page = 'home'
+def register_page(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
 
+        if password != confirm_password:
+            return render(request, 'register.html', {'error': 'Passwords do not match'})
+
+        if User.objects.filter(username=username).exists():
+            return render(request, 'register.html', {'error': 'Username already exists'})
+
+        User.objects.create_user(username=username, email=email, password=password)
+        return redirect('login')
+
+    return render(request, 'register.html')
 
 # ✅ DASHBOARD (Main Logic)
 @login_required
@@ -238,3 +247,24 @@ def profile(request):
     }
 
     return render(request, 'profile.html', context)
+
+@login_required
+def all_tasks(request):
+    tasks = Task.objects.filter(
+        user=request.user,
+        is_deleted=False
+    ).order_by('-created_at')
+
+    return render(request, 'all_tasks.html', {'tasks': tasks})
+
+@login_required
+def todays_task(request):
+    today = date.today()
+
+    tasks = Task.objects.filter(
+        user=request.user,
+        deadline=today,
+        is_deleted=False
+    )
+
+    return render(request, 'todays_task.html', {'tasks': tasks})

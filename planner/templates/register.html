@@ -1,29 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <style>
 
+        .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-{% extends 'base.html' %}
-{% block content %}
+/* Modern round logo */
+.logo-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffffff, #d9f3ff);
+    color: #2e59d9;
+    font-weight: 700;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.25);
+    transition: 0.3s ease;
+}
 
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card p-4">
-            <h3 class="text-center mb-4">Create Account</h3>
+/* Small hover animation */
+.logo-circle:hover {
+    transform: scale(1.1);
+}
 
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
+/* Gradient text */
+.brand-text {
+    font-size: 26px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #ffffff, #cceaff);
+    
+}
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(135deg, #1cc88a, #4e73df);
+            height: 100vh;
 
-                <button type="submit" class="btn btn-primary w-100 mt-3">
-                    Register
-                </button>
-            </form>
+            
+            
+        }
 
-            <p class="text-center mt-3">
-                Already have an account?
-                <a href="{% url 'login' %}">Login</a>
-            </p>
-        </div>
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 40px;
+            color:rgb(9, 56, 106);
+        }
+
+        .nav-buttons a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            padding: 8px 16px;
+            border: 1px solid white;
+            border-radius: 20px;
+        }
+
+        .register-box {
+            background: white;
+            width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .register-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .register-box button {
+            width: 100%;
+            padding: 10px;
+            background: #1cc88a;
+            border: none;
+            color: white;
+            border-radius: 6px;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="brand">
+    <div class="logo-circle">T</div>
+    <span class="brand-text">TaskZen</span>
+</div>
+    <div class="nav-buttons">
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'register' %}">Register</a>
     </div>
 </div>
 
-{% endblock %}
+<div class="register-box">
+    <h3 style="text-align:center;">Create Account</h3>
 
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+    {% csrf_token %}
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+    <button type="submit">Register</button>
+</form>
+
+    <p style="text-align:center; margin-top:15px;">
+        Already have an account?
+        <a href="{% url 'login' %}">Login</a>
+    </p>
+</div>
+
+</body>
+</html>
