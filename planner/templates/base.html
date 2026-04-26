@@ -9,21 +9,65 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <title>TaskZen – Smart To-Do Planner</title>
+
+    <style>
+        body {
+            background: linear-gradient(to right, #94a1da, #8de6e3);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+
+        .sidebar.collapsed .logout-item {
+            display: none;
+        }
+
+        .sidebar.collapsed h5 {
+            display: none;
+        }
+
+        .toggle-btn {
+            cursor: pointer;
+            font-size: 22px;
+            color: white;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+        }
+
+        .username-text {
+            font-size: 18px;
+        }
+    </style>
 </head>
 
 <body>
 
     <!-- NAVBAR -->
     <nav class="navbar navbar-dark bg-dark px-4">
-        <a class="navbar-brand" href="{% url 'dashboard' %}">TaskZen</a>
-
+        <a class="navbar-brand fw-bold fs-3" href="{% url 'dashboard' %}">
+            TaskZen
+        </a>
         <div>
             {% if user.is_authenticated %}
-            <span class="text-white me-3">Hi, {{ user.username }}</span>
-            <form method="POST" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Logout</button>
-            </form>
+            <span class="text-white me-3 fw-bold username-text">
+                Hi, {{ user.username|capfirst }}!
+            </span>
+
             {% else %}
             <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light">Login</a>
             <a href="{% url 'register' %}" class="btn btn-sm btn-outline-light">Register</a>
@@ -31,42 +75,52 @@
         </div>
     </nav>
 
-    <!-- FLASH MESSAGES -->
+    <!-- Flash Messages -->
     <div class="container mt-3">
         {% if messages %}
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endfor %}
         {% endif %}
     </div>
+<<<<<<< HEAD
     {% if user.is_authenticated %}
     <!-- PAGE CONTENT -->
+=======
+
+    {% if user.is_authenticated %}
+>>>>>>> 9147cf8dde3fc30ecf59579724c01f9a73b165d1
     <div class="d-flex">
 
         <!-- Sidebar -->
-        <div class="bg-dark text-white p-3" style="width: 250px; min-height: 100vh;">
-            <h5 class="mb-4">Menu</h5>
+        <div id="sidebar" class="sidebar bg-dark text-white p-3">
+
+            <!-- Toggle Button -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="m-0">Menu</h5>
+                <span class="toggle-btn" onclick="toggleSidebar()">☰</span>
+            </div>
 
             <ul class="nav nav-pills flex-column">
 
-                <li class="nav-item mb-2">
+                <li class="nav-item mb-3">
                     <a href="{% url 'dashboard' %}" class="nav-link text-white">
-                        🏠 Dashboard
+                        🏠 <span class="menu-text">Dashboard</span>
                     </a>
                 </li>
 
-                <li class="nav-item mb-2">
+                <li class="nav-item mb-3">
                     <a href="{% url 'profile' %}" class="nav-link text-white">
-                        👤 Profile
+                        👤 <span class="menu-text">Profile</span>
                     </a>
                 </li>
 
-                <li class="nav-item mb-2">
+                <li class="nav-item mb-3">
                     <a href="{% url 'add_task' %}" class="nav-link text-white">
-                        ➕ Add Task
+                        ➕ <span class="menu-text">Add Task</span>
                     </a>
                 </li>
                 <li class="nav-item mb-2">
@@ -75,6 +129,7 @@
                     </a>
                 </li>
 
+<<<<<<< HEAD
                 <li class="nav-item mb-2">
                     <a href="{% url 'todays_task' %}" class="nav-link text-white">
                         📅 Today
@@ -89,6 +144,35 @@
                         </button>
                     </form>
                 </li>
+=======
+                <li class="nav-item mb-3">
+                    <a href="{% url 'all_tasks' %}" class="nav-link text-white">
+                        📋 <span class="menu-text">All Tasks</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mb-3">
+                    <a href="{% url 'todays_task' %}" class="nav-link text-white">
+                        📅 <span class="menu-text">Today</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mb-3">
+                    <a href="{% url 'about' %}" class="nav-link text-white">
+                        ℹ <span class="menu-text">About</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mt-4 logout-item">
+                    <form method="POST" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger w-100">
+                            🚪 <span class="menu-text">Logout</span>
+                        </button>
+                    </form>
+                </li>
+
+>>>>>>> 9147cf8dde3fc30ecf59579724c01f9a73b165d1
             </ul>
         </div>
         {% endif %}
@@ -99,7 +183,17 @@
             {% endblock %}
         </div>
 
+        {% if user.is_authenticated %}
     </div>
+    {% endif %}
+
+    <!-- Toggle Script -->
+    <script>
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("collapsed");
+        }
+    </script>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 

@@ -3,20 +3,33 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
+<<<<<<< HEAD
 from django.shortcuts import redirect
 from .forms import RegisterForm, TaskForm
+=======
+>>>>>>> 9147cf8dde3fc30ecf59579724c01f9a73b165d1
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
 from .models import Task
 from django.contrib import messages
 from datetime import date, timedelta
-from django.utils import timezone
+from .forms import RegisterForm, TaskForm
 
 
 def login_page(request):
     if request.method == 'POST':
+<<<<<<< HEAD
         username = request.POST.get('username')
         password = request.POST.get('password')
+=======
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Registered successfully! Please login.")
+            return redirect('login')
+    else:
+        form = RegisterForm()
+>>>>>>> 9147cf8dde3fc30ecf59579724c01f9a73b165d1
 
         user = authenticate(request, username=username, password=password)
         if user:
@@ -28,6 +41,7 @@ def login_page(request):
     return render(request, 'login.html')
 
 
+<<<<<<< HEAD
 def register_page(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -40,6 +54,20 @@ def register_page(request):
 
         if User.objects.filter(username=username).exists():
             return render(request, 'register.html', {'error': 'Username already exists'})
+=======
+
+# Login / Logout
+class CustomLoginView(LoginView):
+    template_name = 'login.html'
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid username or password.")
+        return super().form_invalid(form)
+
+
+class CustomLogoutView(LogoutView):
+    next_page = 'login'
+>>>>>>> 9147cf8dde3fc30ecf59579724c01f9a73b165d1
 
         User.objects.create_user(username=username, email=email, password=password)
         return redirect('login')
@@ -54,6 +82,10 @@ def dashboard(request):
         user=request.user,
         is_deleted=False
     )
+    search_query = request.GET.get('search')
+
+    if search_query:
+       tasks = tasks.filter(title__icontains=search_query)
 
     # 🔍 Filters
     category = request.GET.get('category')
@@ -182,14 +214,15 @@ def add_task(request):
         form = TaskForm(request.POST)
         if form.is_valid():
             task = form.save(commit=False)
-            task.user = request.user
-            task.status = 'Pending'
+            task.user = request.user   # VERY IMPORTANT
             task.save()
-            messages.success(request, "Task added successfully")
+            messages.success(request, "Task saved successfully!")
             return redirect('dashboard')
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = TaskForm()
-    
+
     return render(request, 'add_task.html', {'form': form})
 
 @login_required
@@ -268,3 +301,9 @@ def todays_task(request):
     )
 
     return render(request, 'todays_task.html', {'tasks': tasks})
+<<<<<<< HEAD
+=======
+
+def about(request):
+    return render(request, 'about.html')
+>>>>>>> 9147cf8dde3fc30ecf59579724c01f9a73b165d1
